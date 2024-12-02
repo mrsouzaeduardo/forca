@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Forca</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            color: #333;
+        }
+        #question {
+            margin: 20px;
+            font-size: 1.5rem;
+        }
+        #word-display {
+            font-size: 2rem;
+            letter-spacing: 10px;
+            margin: 20px;
+        }
+        #wrong-letters {
+            margin: 20px;
+            color: red;
+        }
+        #forca {
+            margin: 20px auto;
+            width: 200px;
+            height: 300px;
+            position: relative;
+        }
+        .stick {
+            background-color: #333;
+            position: absolute;
+        }
+        .base {
+            width: 100px;
+            height: 10px;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .vertical {
+            width: 10px;
+            height: 250px;
+            left: 50%;
+            bottom: 10px;
+            transform: translateX(-50%);
+        }
+        .top {
+            width: 100px;
+            height: 10px;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .rope {
+            width: 10px;
+            height: 50px;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .head {
+            width: 50px;
+            height: 50px;
+            background-color: #333;
+            border-radius: 50%;
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+        }
+        .body {
+            width: 10px;
+            height: 100px;
+            background-color: #333;
+            position: absolute;
+            top: 110px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: none;
+        }
+        .arm {
+            width: 50px;
+            height: 10px;
+            background-color: #333;
+            position: absolute;
+            top: 130px;
+            display: none;
+        }
+        .arm.left {
+            left: 50%;
+            transform: translateX(-50%) rotate(-45deg);
+        }
+        .arm.right {
+            right: 50%;
+            transform: translateX(50%) rotate(45deg);
+        }
+        .leg {
+            width: 50px;
+            height: 10px;
+            background-color: #333;
+            position: absolute;
+            top: 200px;
+            display: none;
+        }
+        .leg.left {
+            left: 50%;
+            transform: translateX(-50%) rotate(-45deg);
+        }
+        .leg.right {
+            right: 50%;
+            transform: translateX(50%) rotate(45deg);
+        }
+        #keyboard {
+            margin-top: 30px;
+        }
+        button {
+            margin: 5px;
+            padding: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Jogo da Forca</h1>
+    <div id="question">Pergunta: Melhor namorado?</div>
+    <div id="word-display">_ _ _ _ _ _ _</div>
+    <div id="wrong-letters">Letras erradas: </div>
+    <div id="forca">
+        <div class="stick base"></div>
+        <div class="stick vertical"></div>
+        <div class="stick top"></div>
+        <div class="stick rope"></div>
+        <div class="head"></div>
+        <div class="body"></div>
+        <div class="arm left"></div>
+        <div class="arm right"></div>
+        <div class="leg left"></div>
+        <div class="leg right"></div>
+    </div>
+    <div id="keyboard"></div>
+
+    <script>
+        const questions = [
+            { question: "Melhor namorado?", answer: "EDUARDO" },
+            { question: "Mais fofoqueira?", answer: "YASMIN" },
+            { question: "Pessoa que te faz raiva?", answer: "JULIANA" },
+            { question: "O que a Juliana deixou de comer no encontro?", answer: "HAMBURGUER" },
+            { question: "Qual atividade física não faz sentido?", answer: "CROSSFIT" },
+            { question: "Qual tipo de comida favorita do Eduardo?", answer: "DOCE" },
+        ];
+
+        let currentQuestion = 0;
+        let wordDisplay = document.getElementById('word-display');
+        let questionElement = document.getElementById('question');
+        let wrongLettersElement = document.getElementById('wrong-letters');
+        let wrongLetters = [];
+        let correctLetters = [];
+        let parts = Array.from(document.querySelectorAll('.head, .body, .arm, .leg'));
+
+        function updateDisplay() {
+            const answer = questions[currentQuestion].answer;
+            wordDisplay.textContent = answer.split('').map(letter => (correctLetters.includes(letter) ? letter : '_')).join(' ');
+        }
+
+        function showPart() {
+            if (parts.length) parts.shift().style.display = 'block';
+        }
+
+        function checkWin() {
+            const answer = questions[currentQuestion].answer;
+            if (answer.split('').every(letter => correctLetters.includes(letter))) {
+                alert("Você acertou!");
+                nextQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion >= questions.length) {
+                alert("Parabéns, você completou o jogo!");
+                location.reload();
+            } else {
+                reset();
+            }
+        }
+
+        function reset() {
+            correctLetters = [];
+            wrongLetters = [];
+            wrongLettersElement.textContent = 'Letras erradas: ';
+            parts.forEach(part => part.style.display = 'none');
+            questionElement.textContent = `Pergunta: ${questions[currentQuestion].question}`;
+            updateDisplay();
+        }
+
+        function handleGuess(letter) {
+            const answer = questions[currentQuestion].answer;
+            if (answer.includes(letter)) {
+                correctLetters.push(letter);
+                updateDisplay();
+                checkWin();
+            } else {
+                if (!wrongLetters.includes(letter)) {
+                    wrongLetters.push(letter);
+                    wrongLettersElement.textContent = `Letras erradas: ${wrongLetters.join(', ')}`;
+                    showPart();
+                    if (parts.length === 0) {
+                        alert(`Você perdeu! A palavra era: ${answer}`);
+                        nextQuestion();
+                    }
+                }
+            }
+        }
+
+        function createKeyboard() {
+            const keyboard = document.getElementById('keyboard');
+            keyboard.innerHTML = '';
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(letter => {
+                const button = document.createElement('button');
+                button.textContent = letter;
+                button.addEventListener('click', () => handleGuess(letter));
+                keyboard.appendChild(button);
+            });
+        }
+
+        createKeyboard();
+        updateDisplay();
+    </script>
+</body>
+</html>
